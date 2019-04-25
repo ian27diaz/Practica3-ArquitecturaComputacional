@@ -77,9 +77,49 @@ wire [31:0] ALUResult_Or_PC_4;
 wire jr_wire;
 
 wire [31:0] Final_MUX_PC_wire;
+
+/******* WIRES para el pipeline *************/
+wire [31:0] ID_instruction_wire;
+wire [31:0] ID_PC_4_wire;
+
 //******************************************************************/
 //******************************************************************/
 //******************************************************************/
+
+//Pipeline IF/ID
+Pipeline
+#(
+	.N(64)
+)
+PipeLine_IF_ID 
+(
+	.clk(clk),
+	.reset(reset),
+	.enable(1'b1),
+	.nopper(1'b0),
+	.dataInput({Instruction_wire, PC_4_wire}),
+	.dataOutput({ID_instruction_wire, ID_PC_4_wire})
+)
+
+//Pipeline ID/EX
+Pipeline
+#(
+	.N()
+)
+PipeLine_ID_EX
+(
+	.clk(clk),
+	.reset(reset),
+	.enable(),
+	.nopper(),
+	.dataInput({}),
+	.dataOutput({})
+)
+
+//******************************************************************/
+//******************************************************************/
+//******************************************************************/
+
 Control
 ControlUnit
 (
