@@ -63,7 +63,7 @@ always@(OP) begin
 			ControlValues= 14'b000_000_00_00_0000;
 		endcase
 end	
-
+	
   assign Jal = ControlValues[13];
   assign Jump = ControlValues[12];
   assign RegDst = ControlValues[11];

@@ -85,16 +85,16 @@ ControlUnit
 (
 	.OP(Instruction_wire[31:26]),
 	.RegDst(RegDst_wire),
-	.BranchNE(BranchNE_wire),
+	.BranchNE(BranchNE_wire), //
 	.MemRead(MemReadWire),
-	.BranchEQ(BranchEQ_wire),
+	.BranchEQ(BranchEQ_wire), //
 	.MemWrite(MemWriteWire),
 	.MemtoReg(MemtoRegWire),
 	.ALUOp(ALUOp_wire),
 	.ALUSrc(ALUSrc_wire),	
 	.RegWrite(RegWrite_wire),
-	.Jump(jump_wire),
-	.Jal(jal_wire)
+	.Jump(jump_wire), //
+	.Jal(jal_wire) //
 );
 
 //Implementación de la RAM
