@@ -28,7 +28,7 @@ module DataMemory
 	
 	//Arreglando para que funcione en ModelSIM
 	wire [DATA_WIDTH-1:0] fixedAddress;
-	assign fixedAddress = Address/4;
+	assign fixedAddress = (Address - 268500992)/4;
 	
 	//
 	always @ (posedge clk)

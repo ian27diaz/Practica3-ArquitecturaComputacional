@@ -56,9 +56,9 @@ localparam JR 		= 4'b1001;
 		  NOR:
 			ALUResult=~(A|B);
 		  SLL:
-			ALUResult=A << shamt;
+			ALUResult=B << shamt;
 		  SRL:
-			ALUResult=A >> shamt;
+			ALUResult=B >> shamt;
 		  LUI:
 			ALUResult= {B[15:0], 16'h0000};
 		  BRANCH:
