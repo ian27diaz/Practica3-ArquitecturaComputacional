@@ -131,7 +131,7 @@ Pipeline
 #(
 	.N(64)
 )
-Pipeline_IF_ID 
+Pipeline_IF_ID //Correcto al parecer
 (
 	.clk(clk),
 	.reset(reset),
@@ -388,7 +388,7 @@ Mux_ForAluResult_Or_PC_plus_4
 (
 	.Selector(WB_jal_wire),
 	.MUX_Data0(MuxALUsrcORRamDataWire),
-	.MUX_Data1(EX_PC_4_wire), //Se cambiara??
+	.MUX_Data1(EX_PC_4_wire), // ESTO SE VA A TENER QUE CAMBIAR TAMBIEN
 	
   .MUX_Output(ALUResult_Or_PC_4) ////////////////////////////////////////////////////////////
 
@@ -492,7 +492,7 @@ SL2_SignExtend
 	.DataOutput(InmmediateExtend_SL2_wire)
 );
 
-Adder32bits //Este es el adder del PC_4_Wire y el dato inmediato<<2
+Adder32bits //Este es el adder del PC_4_Wire y el dato inmediato<<2 CHECAR ESTO TAMBIEN
 PC4_Immediate
 (
 	.Data0(EX_PC_4_wire),
@@ -508,7 +508,7 @@ Mux_PC4Wire_ImmediateExtendedAndedWire
 (
 	.Selector(PCSrc),
 	.MUX_Data0(EX_PC_4_wire),
-	.MUX_Data1(InmmediateExtendAnded_wire),
+	.MUX_Data1(InmmediateExtendAnded_wire), /*********************** PROB ESTE MAL, igual el de arriba  */
 	
 	.MUX_Output(MUX_PC_wire) // ************ ex-mem
 
@@ -523,7 +523,7 @@ J_Address_SL2
 	.DataOutput(jumpAddressAux)
 );
 
-Adder32bits //Logica para la JumpAddr
+Adder32bits //Logica para la JumpAddr TAL VEZ ESTE MAL TAMBIEN ESTO
 Address_plus_PC4Wire
 (
 	.Data0({PC_4_wire[31:28], 28'b0}),
@@ -560,7 +560,7 @@ MUX_SuperMUXPC_JR_PC8
 
 );
 
-assign ALUResultOut = ALUResult_wire;
+assign ALUResultOut = WB_ALUResult_wire; //cambio
 
 endmodule
 
