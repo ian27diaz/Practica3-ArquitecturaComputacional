@@ -107,11 +107,13 @@ wire [31:0] MEM_ALUResult_wire;
 wire [31:0] MEM_ReadData2_wire;
 wire [4:0] MEM_WriteRegister_wire;
 wire [31:0] MEM_MUX_PC_wire;
+wire [31:0] MEM_instruction_wire;
 wire MEM_MemReadWire;
 wire MEM_MemWriteWire;
 wire MEM_MemtoRegWire;
 wire MEM_RegWrite_wire;
 wire MEM_jal_wire;
+
 
 //wires para MEM/WB
 wire [31:0] WB_ramDataWire;
@@ -122,6 +124,14 @@ wire WB_MemtoRegWire;
 wire WB_RegWrite_wire;
 wire WB_jal_wire;
 wire [31:0] WB_MUX_PC_wire;
+wire [31:0] WB_instruction_wire;
+
+//Wires para ForwardUnit
+wire [1:0] forwardA;
+wire [1:0] forwardB;
+
+wire [31:0] mux3to1_a_output;
+wire [31:0] mux3to1_b_output;
 //******************************************************************/
 //******************************************************************/
 //******************************************************************/
@@ -151,22 +161,22 @@ Pipeline_ID_EX
 	.reset(reset),
 	.enable(1'b1),
 	.nopper(1'b0),
-	.dataInput({RegDst_wire,
-					BranchNE_wire,
-					MemReadWire,
-					BranchEQ_wire,
-					MemWriteWire,
-					MemtoRegWire,
-					ALUOp_wire,
-					ALUSrc_wire,
-					RegWrite_wire,
-					jump_wire,
-					jal_wire,
-					ID_PC_4_wire,
-					ReadData1_wire,
-					ReadData2_wire,
-					InmmediateExtend_wire,
-					ID_instruction_wire
+	.dataInput({RegDst_wire,//1 bit
+					BranchNE_wire,//1 bit
+					MemReadWire, //1 bit
+					BranchEQ_wire,//1 bit
+					MemWriteWire,//1 bit
+					MemtoRegWire,//1 bit
+					ALUOp_wire,//4 bits
+					ALUSrc_wire,//1 bit
+					RegWrite_wire,//1 bit
+					jump_wire,//1 bit
+					jal_wire,// 1 bit
+					ID_PC_4_wire,//32 bits
+					ReadData1_wire,//32 bits
+					ReadData2_wire,//32 bits
+					InmmediateExtend_wire,//32 bits
+					ID_instruction_wire//32 bits
 					}),
 	.dataOutput({EX_RegDst_wire,
 					 EX_BranchNE_wire,
@@ -188,9 +198,50 @@ Pipeline_ID_EX
 );
 
 
+ForwardUnit
+forwardUnit
+(
+.clk(clk),
+.EX_MEM_RegWrite(MEM_MemWriteWire),
+.EX_MEM_RegisterRd(MEM_instruction_wire[15:11]),
+.MEM_WB_RegisterRd(WB_instruction_wire[15:11]),
+.ID_EX_RegisterRs(EX_instruction_wire[25:21]),
+.ID_EX_RegisterRt(EX_instruction_wire[20:16]),
+.MEM_WB_RegWrite(WB_RegWrite_wire),
+.Forward_A(forwardA),
+.Forward_B(forwardB)
+);
+
+//*************************MUXES DE 3*********************************/
+Mux3to1
+#(
+	.NBits(32)
+)
+mux3to1_a
+(
+	.Selector(forwardA),
+	.MUX_Data0(EX_ReadData1_wire),
+	.MUX_Data1(MuxALUsrcORRamDataWire),
+	.MUX_Data2(MEM_ALUResult_wire),
+	.MUX_Output(mux3to1_a_output)
+);
+
+Mux3to1
+#(
+	.NBits(32)
+)
+mux3to1_b
+(
+	.Selector(forwardB),
+	.MUX_Data0(salidaMuxALUsrc),
+	.MUX_Data1(MuxALUsrcORRamDataWire),//Wire del mux de hasta la derecha MemtoRegWire
+	.MUX_Data2(MEM_ALUResult_wire),
+	.MUX_Output(mux3to1_b_output)
+);
+//*************************MUXES DE 3*********************************/
 Pipeline
 #(
-	.N(137)
+	.N(138)
 )
 Pipeline_EX_MEM
 (
@@ -199,16 +250,16 @@ Pipeline_EX_MEM
 	.enable(1'b1),
 	.nopper(1'b0),
 	.dataInput({
-				InmmediateExtendAnded_wire,
-				ALUResult_wire,
-				EX_ReadData2_wire,
-				WriteRegister_wire,
-				MUX_PC_wire,
-				EX_MemReadWire,
-				EX_MemWriteWire,
-				EX_MemtoRegWire,
-				EX_RegWrite_wire,
-				EX_jal_wire
+				InmmediateExtendAnded_wire,//32 bits
+				ALUResult_wire,//32 bits
+				EX_ReadData2_wire,//32 bits
+				WriteRegister_wire,//5 bits
+				MUX_PC_wire,//32 bits
+				EX_MemReadWire,//1 bit
+				EX_MemWriteWire,//1 bit
+				EX_MemtoRegWire,//1 bit
+				EX_RegWrite_wire,//1 bit
+				EX_jal_wire//1 bit
 				}),
 	.dataOutput({
 				MEM_InmmediateExtendAnded_wire,
@@ -220,13 +271,15 @@ Pipeline_EX_MEM
 				MEM_MemWriteWire,
 				MEM_MemtoRegWire,
 				MEM_RegWrite_wire,
-				MEM_jal_wire})
+				MEM_jal_wire,
+				MEM_instruction_wire
+				})
 );
 
 //Pipeline MEM/WB
 Pipeline
 #(
-	.N(105)
+	.N(137)
 )
 Pipeline_MEM_WB 
 (
@@ -235,14 +288,15 @@ Pipeline_MEM_WB
 	.enable(1'b1),
 	.nopper(1'b0),
 	.dataInput({
-				ramDataWire,
-				MEM_ALUResult_wire,
-				MEM_MemWriteWire,
-				MEM_MemtoRegWire,
-				MEM_RegWrite_wire,
-				MEM_jal_wire,
-				MEM_WriteRegister_wire,
-				MEM_MUX_PC_wire ////////////////////
+				ramDataWire,//32 bits
+				MEM_ALUResult_wire,//32 bits
+				MEM_MemWriteWire,//1 bit
+				MEM_MemtoRegWire,//1 bit
+				MEM_RegWrite_wire,//1 bit
+				MEM_jal_wire,//1 bit
+				MEM_WriteRegister_wire,//5 bits
+				MEM_MUX_PC_wire, //32 bits
+				MEM_instruction_wire // 32 bits
 				}),
 	.dataOutput({
 				WB_ramDataWire,
@@ -252,7 +306,9 @@ Pipeline_MEM_WB
 				WB_RegWrite_wire,
 				WB_jal_wire,
 				WB_WriteRegister_wire,
-				WB_MUX_PC_wire})
+				WB_MUX_PC_wire,
+				WB_instruction_wire
+				})
 );
 
 //******************************************************************/
@@ -306,7 +362,7 @@ PC_Register_b
 (
 	.clk(clk),
 	.reset(reset),
-	.NewPC(Final_MUX_PC_wire),
+	.NewPC(PC_4_wire), //fINAL MUX PC WIRE ESTABA ANTES
 	.PCValue(PC_wire)
 );
 
@@ -450,8 +506,8 @@ ArithmeticLogicUnit
 (
 	.ALUOperation(ALUOperation_wire),
 	.rs(EX_ReadData2_wire),
-	.A(EX_ReadData1_wire),
-	.B(salidaMuxALUsrc), //Si es immediate o lo de Register File
+	.A(mux3to1_a_output),
+	.B(mux3to1_b_output), //Si es immediate o lo de Register File
 	.shamt(EX_instruction_wire[10:6]),
 	.Zero(Zero_wire),
 	.isJR(jr_wire), //Como JR es tipo R, aqui decido el cable jr.

@@ -10,35 +10,34 @@ module ForwardUnit
 	input MEM_WB_RegWrite,
 	//outputs
 	
-	output reg [4:0] Forward_A,
-	output reg [4:0] Forward_B
+	output reg [1:0] Forward_A,
+	output reg [1:0] Forward_B
 
 );
 
-always@(negedge clk or EX_MEM_RegWrite, MEM_WB_RegWrite, EX_MEM_RegisterRd, MEM_WB_RegisterRd, ID_EX_RegisterRs, ID_EX_RegisterRt)
+always@(EX_MEM_RegWrite, MEM_WB_RegWrite, EX_MEM_RegisterRd, MEM_WB_RegisterRd, ID_EX_RegisterRs, ID_EX_RegisterRt)
 begin
-
-	Forward_A <= 5'b00000;
-	Forward_B <= 5'b00000;
+	Forward_A <= 2'b00;
+	Forward_B <= 2'b00;
 	
-	if((EX_MEM_RegWrite == 1) and (EX_MEM_RegisterRd != 0) and (EX_MEM_RegisterRd == ID_EX_RegisterRs) )
+	if((EX_MEM_RegWrite == 1) && (EX_MEM_RegisterRd != 0) && (EX_MEM_RegisterRd == ID_EX_RegisterRs) )
 	begin
-		Forward_A <= 5'00010;
+		Forward_A <= 2'b10;
 	end
 	
-	if((EX_MEM_RegWrite == 1) and (EX_MEM_RegisterRd != 0) and (EX_MEM_RegisterRd == ID_EX_RegisterRt))
+	if((EX_MEM_RegWrite == 1) && (EX_MEM_RegisterRd != 0) && (EX_MEM_RegisterRd == ID_EX_RegisterRt))
 	begin
-		Forward_B <= 5'b00010;
+		Forward_B <= 2'b10;
 	end
 	
-	if((EX_MEM_RegWrite == 1) and (EX_MEM_RegisterRd != 0) and (EX_MEM_RegisterRd == ID_EX_RegisterRs) and (EX_MEM_RegisterRd != ID_EX_RegisterRs))
+	if((EX_MEM_RegWrite == 1) && (EX_MEM_RegisterRd != 0) && (EX_MEM_RegisterRd == ID_EX_RegisterRs) && (EX_MEM_RegisterRd != ID_EX_RegisterRs))
 	begin
-		Forward_A <= 5'00001;
+		Forward_A <= 2'b01;
 	end
 	
-	if((EX_MEM_RegWrite == 1) and (EX_MEM_RegisterRd != 0) and (EX_MEM_RegisterRd == ID_EX_RegisterRt) and (EX_MEM_RegisterRd != ID_EX_RegisterRt))
+	if((EX_MEM_RegWrite == 1) && (EX_MEM_RegisterRd != 0) && (EX_MEM_RegisterRd == ID_EX_RegisterRt) && (EX_MEM_RegisterRd != ID_EX_RegisterRt))
 	begin
-		Forward_B <= 5'b00001;
+		Forward_B <= 2'b01;
 	end
 
 end
