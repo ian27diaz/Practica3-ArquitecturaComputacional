@@ -202,7 +202,7 @@ ForwardUnit
 forwardUnit
 (
 .clk(clk),
-.EX_MEM_RegWrite(MEM_MemWriteWire),
+.EX_MEM_RegWrite(MEM_RegWrite_wire),
 .EX_MEM_RegisterRd(MEM_instruction_wire[15:11]),
 .MEM_WB_RegisterRd(WB_instruction_wire[15:11]),
 .ID_EX_RegisterRs(EX_instruction_wire[25:21]),
@@ -241,7 +241,7 @@ mux3to1_b
 //*************************MUXES DE 3*********************************/
 Pipeline
 #(
-	.N(138)
+	.N(170)
 )
 Pipeline_EX_MEM
 (
@@ -259,7 +259,8 @@ Pipeline_EX_MEM
 				EX_MemWriteWire,//1 bit
 				EX_MemtoRegWire,//1 bit
 				EX_RegWrite_wire,//1 bit
-				EX_jal_wire//1 bit
+				EX_jal_wire,//1 bit
+				EX_instruction_wire //32 bits
 				}),
 	.dataOutput({
 				MEM_InmmediateExtendAnded_wire,
