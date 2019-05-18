@@ -8,6 +8,9 @@ module ForwardUnit
 	input [4:0] ID_EX_RegisterRs,
 	input [4:0] ID_EX_RegisterRt,
 	input MEM_WB_RegWrite,
+
+	input [4:0]EX_MEM_RegisterRt,
+	input [4:0] MEM_WB_RegisterRt,
 	//outputs
 	
 	output reg [1:0] Forward_A,
@@ -25,21 +28,45 @@ begin
 		Forward_A <= 2'b10;
 	end
 	
-	if((EX_MEM_RegWrite == 1) && (EX_MEM_RegisterRd != 0) && (EX_MEM_RegisterRd == ID_EX_RegisterRt))
+	//Tipo I
+	if((EX_MEM_RegWrite == 1) && (EX_MEM_RegisterRt != 0) && (EX_MEM_RegisterRt == ID_EX_RegisterRs) )
+	begin
+		Forward_A <= 2'b10;
+	end
+
+	//Tipo I
+	if((EX_MEM_RegWrite == 1) && (EX_MEM_RegisterRt!= 0) && (EX_MEM_RegisterRt == ID_EX_RegisterRt))
 	begin
 		Forward_B <= 2'b10;
 	end
 	
-	if((EX_MEM_RegWrite == 1) && (EX_MEM_RegisterRd != 0) && (EX_MEM_RegisterRd == ID_EX_RegisterRs) && (EX_MEM_RegisterRd != ID_EX_RegisterRs))
+	if((EX_MEM_RegWrite == 1) && (EX_MEM_RegisterRd != 0) && (EX_MEM_RegisterRd == ID_EX_RegisterRt))
+	begin
+		Forward_B <= 2'b10;
+	end
+	//MEM-WB
+	if((MEM_WB_RegWrite == 1) && (MEM_WB_RegisterRd != 0) && (MEM_WB_RegisterRd == ID_EX_RegisterRs) && (EX_MEM_RegisterRd != ID_EX_RegisterRs))
 	begin
 		Forward_A <= 2'b01;
 	end
 	
-	if((EX_MEM_RegWrite == 1) && (EX_MEM_RegisterRd != 0) && (EX_MEM_RegisterRd == ID_EX_RegisterRt) && (EX_MEM_RegisterRd != ID_EX_RegisterRt))
+	if((MEM_WB_RegWrite == 1) && (MEM_WB_RegisterRt != 0) && (MEM_WB_RegisterRt == ID_EX_RegisterRs) && (EX_MEM_RegisterRt != ID_EX_RegisterRs))
+	begin
+		Forward_A <= 2'b01;
+	end
+	
+	if((MEM_WB_RegWrite == 1) && (MEM_WB_RegisterRd != 0) && (MEM_WB_RegisterRd == ID_EX_RegisterRt) && (EX_MEM_RegisterRd != ID_EX_RegisterRt))
 	begin
 		Forward_B <= 2'b01;
 	end
 
+	if((MEM_WB_RegWrite == 1) && (MEM_WB_RegisterRt != 0) && (MEM_WB_RegisterRt == ID_EX_RegisterRt) && (EX_MEM_RegisterRt != ID_EX_RegisterRt))
+	begin
+		Forward_B <= 2'b01;
+	end
+
+
+	
 end
 
 

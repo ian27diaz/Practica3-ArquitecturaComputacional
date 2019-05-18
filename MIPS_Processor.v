@@ -208,6 +208,8 @@ forwardUnit
 .ID_EX_RegisterRs(EX_instruction_wire[25:21]),
 .ID_EX_RegisterRt(EX_instruction_wire[20:16]),
 .MEM_WB_RegWrite(WB_RegWrite_wire),
+.EX_MEM_RegisterRt(MEM_instruction_wire[20:16]),
+.MEM_WB_RegisterRt(WB_instruction_wire[20:16]),
 .Forward_A(forwardA),
 .Forward_B(forwardB)
 );
