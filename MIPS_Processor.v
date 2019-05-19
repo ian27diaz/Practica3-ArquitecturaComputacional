@@ -132,6 +132,13 @@ wire [1:0] forwardB;
 
 wire [31:0] mux3to1_a_output;
 wire [31:0] mux3to1_b_output;
+
+//wires para HazardDetectionUnit
+wire IF_ID_Write;
+wire control_mux_wire;
+wire pc_write;
+wire [13:0] Mux_Control_or_Flush;
+wire [31:0] PC_flushed_or_PC4Wire;
 //******************************************************************/
 //******************************************************************/
 //******************************************************************/
@@ -146,11 +153,67 @@ Pipeline_IF_ID //Correcto al parecer
 	.clk(clk),
 	.reset(reset),
 	.enable(1'b1),
-	.nopper(1'b0),
+	.nopper(IF_ID_Write),
 	.dataInput({Instruction_wire, PC_4_wire}),
 	.dataOutput({ID_instruction_wire, ID_PC_4_wire})
 );
+
+//************************HAZARD DET. UNIT*********************************/
+HazardDetectionUnit
+hazardDetUnit
+(
+	.ID_EX_MemRead(EX_MemReadWire),
+    .ID_EX_RegisterRt(EX_instruction_wire[20:16]),
+    .IF_ID_RegisterRs(ID_instruction_wire[25:21]),
+    .IF_ID_RegisterRt(ID_instruction_wire[20:16]),
+	//Output
+    .IF_ID_Write(IF_ID_Write),
+    .PC_Write(pc_write),
+    .control_mux(control_mux_wire)
+);
+
+
+Multiplexer2to1
+#(
+	.NBits(14)
+)
+MuxResetControlSignals
+(
+	.Selector(control_mux_wire),
+	.MUX_Data0({RegDst_wire,//1 bit
+					BranchNE_wire,//1 bit
+					MemReadWire, //1 bit
+					BranchEQ_wire,//1 bit
+					MemWriteWire,//1 bit
+					MemtoRegWire,//1 bit
+					ALUOp_wire,//4 bits
+					ALUSrc_wire,//1 bit
+					RegWrite_wire,//1 bit
+					jump_wire,//1 bit
+					jal_wire}),// 1 bit}),
+	.MUX_Data1(14'b0000000_0000000),
 	
+	.MUX_Output(Mux_Control_or_Flush)
+
+);
+
+
+
+Multiplexer2to1
+#(
+	.NBits(32)
+)
+Flush_PC
+(
+	.Selector(pc_write),
+	.MUX_Data0(PC_4_wire),
+	.MUX_Data1(PC_wire),
+	
+	.MUX_Output(PC_flushed_or_PC4Wire)
+
+);
+
+//************************HAZARD DET. UNIT*********************************/
 Pipeline
 #(
 	.N(174)
@@ -161,17 +224,7 @@ Pipeline_ID_EX
 	.reset(reset),
 	.enable(1'b1),
 	.nopper(1'b0),
-	.dataInput({RegDst_wire,//1 bit
-					BranchNE_wire,//1 bit
-					MemReadWire, //1 bit
-					BranchEQ_wire,//1 bit
-					MemWriteWire,//1 bit
-					MemtoRegWire,//1 bit
-					ALUOp_wire,//4 bits
-					ALUSrc_wire,//1 bit
-					RegWrite_wire,//1 bit
-					jump_wire,//1 bit
-					jal_wire,// 1 bit
+	.dataInput({	Mux_Control_or_Flush, //14 bits
 					ID_PC_4_wire,//32 bits
 					ReadData1_wire,//32 bits
 					ReadData2_wire,//32 bits
@@ -365,7 +418,7 @@ PC_Register_b
 (
 	.clk(clk),
 	.reset(reset),
-	.NewPC(PC_4_wire), //fINAL MUX PC WIRE ESTABA ANTES
+	.NewPC(PC_flushed_or_PC4Wire), //fINAL MUX PC WIRE ESTABA ANTES
 	.PCValue(PC_wire)
 );
 
