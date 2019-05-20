@@ -139,6 +139,7 @@ wire control_mux_wire;
 wire pc_write;
 wire [13:0] Mux_Control_or_Flush;
 wire [31:0] PC_flushed_or_PC4Wire;
+
 //******************************************************************/
 //******************************************************************/
 //******************************************************************/
@@ -207,7 +208,7 @@ Flush_PC
 (
 	.Selector(pc_write),
 	.MUX_Data0(PC_4_wire),
-	.MUX_Data1(PC_wire),
+	.MUX_Data1(PC_wire - 4),
 	
 	.MUX_Output(PC_flushed_or_PC4Wire)
 
